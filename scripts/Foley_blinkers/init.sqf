@@ -82,9 +82,9 @@ addMissionEventHandler [
 				continue;
 			};
 
-			if (_vehicle distance player > 1000 && diag_frameNo % 10 != 0) then {
-				continue;
-			};
+			// if (_vehicle distance player > 1000 && diag_frameNo % 10 != 0) then {
+			// 	continue;
+			// };
 			
 			{
 				private _light = _vehicle getVariable ("Foley_lightPoint" + _x);
