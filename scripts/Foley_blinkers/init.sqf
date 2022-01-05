@@ -1,6 +1,78 @@
+#include "macros.hpp"
+
+GVAR(config) = createHashMap;
+GVAR(fnc_loadConfig) = {
+	{
+		private _config = parseSimpleArray preprocessFile (BASE_DIR + "config\" + _x);
+		GVAR(config) merge (createHashMapFromArray _config);
+	} forEach ["bis.sqf", "uk3cb.sqf", "extras.sqf"];
+
+	{
+		GVAR(config) set [_x, createHashMapFromArray (GVAR(config) get _x)];
+	} forEach keys GVAR(config);
+};
+call GVAR(fnc_loadConfig);
+
+GVAR(managedVehicles) = [];
+GVAR(fnc_initVehicle) = {
+	params ["_vehicle"];
+
+	if (_vehicle in GVAR(managedVehicles)) exitWith {};
+
+	private _config = GVAR(config) get (typeOf _vehicle);
+
+	if (isNil "_config") exitWith {};
+
+	[_vehicle] call compile preprocessFileLineNumbers (BASE_DIR + "modules\actions.sqf");
+	[_vehicle] call compile preprocessFileLineNumbers (BASE_DIR + "modules\audio.sqf");
+	[_vehicle] call compile preprocessFileLineNumbers (BASE_DIR + "modules\breaker.sqf");
+	[_vehicle] call compile preprocessFileLineNumbers (BASE_DIR + "modules\interaction.sqf");
+	// [_vehicle] call compile preprocessFileLineNumbers (BASE_DIR + "modules\debug.sqf");
+	[_vehicle, _config] call compile preprocessFileLineNumbers (BASE_DIR + "modules\lights.sqf");
+
+	GVAR(managedVehicles) pushBack _vehicle;
+};
+
+private _vehicles = [];
+
+if (!isNil "_this") then {
+	_vehicles = _this;
+} else {
+	_vehicles = vehicles select {typeOf _x in GVAR(config)};
+};
+
 {
-	[_x] execVM "scripts\Foley_blinkers\blinkers.sqf";
-} forEach (vehicles select {_x isKindOf "LandVehicle"});
+	private _v = _x;
+
+	if (_x isEqualType "") then {
+		{
+			[_x] call GVAR(fnc_initVehicle);
+		} forEach (vehicles select {typeOf _x == _v})
+	};
+	
+	if (_x isEqualType objNull) then {
+		[_x] call GVAR(fnc_initVehicle);
+	};
+} forEach _vehicles;
+
+call compile preprocessFileLineNumbers (BASE_DIR + "modules\dashboard.sqf");
+addMissionEventHandler [
+	"Draw3D",
+	{
+		{
+			if (!alive _x) then {
+				GVAR(managedVehicles) = GVAR(managedVehicles) select {alive _x};
+				continue;
+			};
+
+			[_x] call GVAR(fnc_drawDashboard);
+
+			if (abs speed _x > 0.01) then {
+				[_x, diag_frameNo % 2 == 0] call GVAR(fnc_adjustOffsets);
+			};
+		} forEach GVAR(managedVehicles);
+	}
+];
 
 // Foley_reps = 10;
 // Foley_fps = 60;
@@ -49,63 +121,3 @@
 // 		};
 // 	}
 // ];
-
-#define GREEN_LIT [0, 1, 0, 1]
-#define GREEN_DIM [0, 0.4, 0, 0.67]
-#define RED_LIT [1, 0, 0, 1]
-#define RED_DIM [0.7, 0, 0, 0.67]
-
-addMissionEventHandler [
-	"Draw3D",
-	{
-		{
-			private _vehicle = _x;
-
-			if (vehicle player == _vehicle && cameraView == "INTERNAL") then {
-				private _state = _vehicle getVariable ["Foley_blinkerEffectiveState", 0];
-				private _colorLeft = [GREEN_DIM, GREEN_LIT] select (_state == 1 || _state == 3);
-				private _colorRight = [GREEN_DIM, GREEN_LIT] select (_state == 2 || _state == 3);
-				private _colorHazards = [RED_DIM, RED_LIT] select (_state == 3);
-
-				if (driver vehicle player != player) then {
-					_colorLeft set [3, (_colorLeft select 3) / 2];
-					_colorRight set [3, (_colorRight select 3) / 2];
-					_colorHazards set [3, (_colorHazards select 3) / 2];
-				};
-
-				drawIcon3D ["", _colorLeft, player modelToWorldVisual [-0.08, 0.58, 0.52], 0, 0, 0, "<", 2, 0.09, "RobotoCondensedBold"];
-				drawIcon3D ["", _colorHazards, player modelToWorldVisual [-0.04, 0.58, 0.52], 0, 0, 0, "<!>", 2, 0.07, "RobotoCondensedBold"];
-				drawIcon3D ["", _colorRight, player modelToWorldVisual [0.00, 0.58, 0.52], 0, 0, 0, ">", 2, 0.09, "RobotoCondensedBold"];
-			};
-
-			if (abs speed _vehicle < 0.01) then { 
-				continue;
-			};
-
-			// if (_vehicle distance player > 1000 && diag_frameNo % 10 != 0) then {
-			// 	continue;
-			// };
-			
-			{
-				private _light = _vehicle getVariable ("Foley_lightPoint" + _x);
-				private _memPoint = _vehicle getVariable ("Foley_lightPoint" + _x + "_mempoint");
-				private _sphere = _vehicle getVariable ("Foley_lightPoint" + _x + "_sphere");
-
-				private _adjustment = _vehicle getVariable ["Foley_lightPoint" + _x + "_adjustment", [0, 0, 0]];
-				_sphere setPosASL getPosASLVisual _light;
-
-				private _pos = _vehicle modelToWorldVisual _memPoint;
-				private _adjustedPos = (AGLToASL _pos) vectorAdd _adjustment;
-				_light setPosASL _adjustedPos;
-
-				private _acceleration = (vectorMagnitude ((_vehicle getVariable ["Foley_lastVelocity", [0, 0, 0]]) vectorDiff velocity _vehicle))  / diag_deltaTime;
-				_vehicle setVariable ["Foley_lastVelocity", velocity _vehicle];
-
-				if (diag_frameNo % 10 == 0 || _acceleration > 3 && diag_frameNo % 2 == 0) then {
-					_adjustment = _adjustment vectorAdd (((AGLToASL _pos) vectorDiff (getPosASLVisual _sphere)) vectorMultiply 0.999);
-					_vehicle setVariable ["Foley_lightPoint" + _x + "_adjustment", _adjustment];
-				};
-			} forEach ["FL", "RR", "FR", "RL"];		
-		} forEach (vehicles select {_x isKindOf "LandVehicle"});
-	}
-];

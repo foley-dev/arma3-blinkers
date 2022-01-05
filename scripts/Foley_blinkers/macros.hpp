@@ -4,10 +4,15 @@
 #define NAMESPACE Foley_blinkers
 #define GVAR(var1) DOUBLES(NAMESPACE,var1)
 #define QGVAR(var1) QUOTE(GVAR(var1))
+#define BASE_DIR "scripts\Foley_blinkers\"
 
 // Keybindings
-#define KEY_INTERACT_LEFT "DIK_Z"
-#define KEY_INTERACT_RIGHT "DIK_C"
+
+// DIK_Z
+#define KEY_INTERACT_LEFT 44
+
+// DIK_C
+#define KEY_INTERACT_RIGHT 46
 
 // Enums
 #define INTERACT_LEFT 1
@@ -36,7 +41,7 @@
 		[_vehicle, INTERACT_LEFT]
 	] call BIS_fnc_callScriptedEventHandler;
 */
-#define INTERACTED QGVAR(INTERACTED)
+#define INTERACTED QGVAR(interacted)
 
 /*
 	[

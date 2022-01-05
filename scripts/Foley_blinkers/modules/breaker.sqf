@@ -1,5 +1,5 @@
 #include "..\macros.hpp"
-#define INTERVAL_RANDOM_DIST [0.45, 0.5, 0.55]
+#define INTERVAL_RANDOM_DIST [0.45, 0.50, 0.55]
 
 params ["_vehicle"];
 
@@ -18,6 +18,15 @@ params ["_vehicle"];
 		};
 
 		[_vehicle, _currentSetting] spawn {
+			params ["_vehicle", "_currentSetting"];
+
+			private _interval = _vehicle getVariable QGVAR(interval);
+
+			if (isNil "_interval") then {
+				_interval = random INTERVAL_RANDOM_DIST;
+				_vehicle setVariable [QGVAR(interval), _interval, local _vehicle];
+			};
+
 			private _circuitClosed = true;
 
 			while {alive _vehicle && _vehicle getVariable [QGVAR(setting), SETTING_OFF] == _currentSetting} do {
@@ -26,8 +35,9 @@ params ["_vehicle"];
 					BREAKER,
 					[_vehicle, _circuitClosed]
 				] call BIS_fnc_callScriptedEventHandler;
+				_vehicle setVariable [QGVAR(circuitClosed), _circuitClosed];
 
-				sleep INTERVAL_RANDOM_DIST;
+				sleep _interval;
 				_circuitClosed = !_circuitClosed;
 			};
 		};

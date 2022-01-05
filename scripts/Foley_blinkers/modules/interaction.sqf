@@ -43,7 +43,7 @@ GVAR(automaticHazards) = {
 	if (alive _vehicle) then {
 		waitUntil {
 			sleep 1;
-			!canMove _vehicle
+			canMove _vehicle
 		};
 
 		[_vehicle] spawn GVAR(automaticHazards);

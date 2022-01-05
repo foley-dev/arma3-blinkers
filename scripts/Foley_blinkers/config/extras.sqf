@@ -1,8 +1,8 @@
 /*
-	Add new or override existing blinker locations here
+	Add or override blinker locations here
 	
 	Helpful script:
-	[fl, rr, fr, rl] apply {
+	[fl, rr, fr, rl, dash] apply {
 		(cursorObject worldToModel getPos _x) apply {parseNumber (_x toFixed 2)}
 	}
 */
