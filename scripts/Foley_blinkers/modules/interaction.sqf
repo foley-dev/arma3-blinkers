@@ -33,7 +33,7 @@ GVAR(automaticHazards) = {
 	params ["_vehicle"];
 
 	waitUntil {
-		sleep 0.1;
+		sleep 0.5;
 		!alive _vehicle || !canMove _vehicle
 	};
 

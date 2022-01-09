@@ -7,10 +7,9 @@
 #define REFERENCE_DISTANCE 0.5
 
 GVAR(fnc_drawDashboard) = {
-	params ["_vehicle"];
+	if (!((vehicle player) in GVAR(managedVehicles)) || cameraView != "INTERNAL") exitWith {};
 
-	if (vehicle player != _vehicle || cameraView != "INTERNAL") exitWith {};
-
+	private _vehicle = vehicle player;
 	private _state = _vehicle getVariable [QGVAR(setting), SETTING_OFF];
 	private _circuitClosed = _vehicle getVariable [QGVAR(circuitClosed), false];
 
@@ -22,7 +21,7 @@ GVAR(fnc_drawDashboard) = {
 	private _colorHazards = [RED_DIM, RED_LIT] select (_state == SETTING_HAZARDS);
 	private _colorRight = [GREEN_DIM, GREEN_LIT] select (_state == SETTING_RIGHT || _state == SETTING_HAZARDS);
 
-	if (driver vehicle player != player) then {
+	if (driver _vehicle != player) then {
 		_colorLeft set [3, (_colorLeft select 3) / 2];
 		_colorHazards set [3, (_colorHazards select 3) / 2];
 		_colorRight set [3, (_colorRight select 3) / 2];

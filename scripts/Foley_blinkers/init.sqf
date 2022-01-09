@@ -55,6 +55,8 @@ if (!isNil "_this") then {
 	};
 } forEach _vehicles;
 
+[] spawn GVAR(listenKeyDown);
+
 call compile preprocessFileLineNumbers (BASE_DIR + "modules\dashboard.sqf");
 addMissionEventHandler [
 	"Draw3D",
@@ -65,17 +67,17 @@ addMissionEventHandler [
 				continue;
 			};
 
-			[_x] call GVAR(fnc_drawDashboard);
-
-			if (abs speed _x > 0.01) then {
+			if (abs speed _x > 1) then {
 				[_x, diag_frameNo % 2 == 0] call GVAR(fnc_adjustOffsets);
 			};
 		} forEach GVAR(managedVehicles);
+
+		call GVAR(fnc_drawDashboard);
 	}
 ];
 
 onEachFrame {
-	call GVAR(fnc_drawParticles);
+	call GVAR(fnc_dropParticles);
 };
 
 // Foley_reps = 10;

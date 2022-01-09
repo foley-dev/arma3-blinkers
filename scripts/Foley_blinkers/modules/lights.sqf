@@ -24,7 +24,6 @@ params ["_vehicle", "_config"];
 	
 	private _tracker = "Sign_sphere25cm_F" createVehicleLocal (getPos _vehicle);
 	hideObject _tracker;
-	_tracker attachTo [_vehicle, _offset];
 
 	_vehicle setVariable [QGVAR(light) + _x, _light];
 	_vehicle setVariable [QGVAR(lightOffset) + _x, _offset];
@@ -184,11 +183,16 @@ GVAR(fnc_adjustOffsets) = {
 	} forEach ["FL", "FR", "RL", "RR"];
 };
 
-GVAR(fnc_drawParticles) = {
+GVAR(fnc_dropParticles) = {
 	{
 		_x params ["_vehicle", "_offset"];
 
 		private _distance = _vehicle distance positionCameraToWorld [0, 0, 0];
+
+		if (_distance > 2000) then {
+			continue;
+		};
+
 		private _size = 0.4;
 
 		if (_distance < 30) then {

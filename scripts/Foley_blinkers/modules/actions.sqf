@@ -92,7 +92,7 @@ _vehicle setVariable [QGVAR(actionHazards), _actionHazards];
 	}
 ] call BIS_fnc_addScriptedEventHandler;
 
-[] spawn {
+GVAR(listenKeyDown) = {
 	waitUntil {
 		!isNull (findDisplay 46)
 	};
