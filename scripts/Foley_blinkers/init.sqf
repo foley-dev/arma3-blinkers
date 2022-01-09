@@ -74,6 +74,10 @@ addMissionEventHandler [
 	}
 ];
 
+onEachFrame {
+	call GVAR(fnc_drawParticles);
+};
+
 // Foley_reps = 10;
 // Foley_fps = 60;
 // Foley_offsetFactor = 1;

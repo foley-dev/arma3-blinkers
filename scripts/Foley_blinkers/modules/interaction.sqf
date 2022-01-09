@@ -3,7 +3,9 @@
 params ["_vehicle"];
 
 GVAR(fnc_applySetting) = {
-	params ["_vehicle", "_setting", "_previousSetting"];
+	params ["_vehicle", "_setting"];
+
+	private _previousSetting = _vehicle getVariable [QGVAR(setting), SETTING_OFF];
 
 	if (_setting != _previousSetting) then {
 		_vehicle setVariable [QGVAR(setting), _setting, true];
@@ -23,7 +25,7 @@ GVAR(fnc_applySetting) = {
 
 		private _previousSetting = _vehicle getVariable [QGVAR(setting), SETTING_OFF];
 		private _setting = [SETTING_OFF, _interactionType] select (_interactionType != _previousSetting);
-		[_vehicle, _setting, _previousSetting] call GVAR(fnc_applySetting);
+		[_vehicle, _setting] call GVAR(fnc_applySetting);
 	}
 ] call BIS_fnc_addScriptedEventHandler;
 
@@ -36,8 +38,7 @@ GVAR(automaticHazards) = {
 	};
 
 	if (alive _vehicle && local _vehicle) then {
-		private _previousSetting = _vehicle getVariable [QGVAR(setting), SETTING_OFF];
-		[_vehicle, SETTING_HAZARDS, _previousSetting] call GVAR(fnc_applySetting);
+		[_vehicle, SETTING_HAZARDS] call GVAR(fnc_applySetting);
 	};
 
 	if (alive _vehicle) then {

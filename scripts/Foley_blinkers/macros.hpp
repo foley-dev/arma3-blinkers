@@ -34,12 +34,6 @@
 			params ["_vehicle", "_interactionType"];
 		}
 	] call BIS_fnc_addScriptedEventHandler;
-
-	[
-		_vehicle,
-		INTERACTED,
-		[_vehicle, INTERACT_LEFT]
-	] call BIS_fnc_callScriptedEventHandler;
 */
 #define INTERACTED QGVAR(interacted)
 
@@ -51,12 +45,6 @@
 			params ["_vehicle", "_currentSetting", "_previousSetting"];
 		}
 	] call BIS_fnc_addScriptedEventHandler;
-
-	[
-		_vehicle,
-		SETTING_CHANGED,
-		[_vehicle, SETTING_LEFT, SETTING_OFF]
-	] call BIS_fnc_callScriptedEventHandler;
 */
 #define SETTING_CHANGED QGVAR(settingChanged)
 
@@ -68,11 +56,5 @@
 			params ["_vehicle", "_circuitClosed"];
 		}
 	] call BIS_fnc_addScriptedEventHandler;
-
-	[
-		_vehicle,
-		BREAKER,
-		[_vehicle, true]
-	] call BIS_fnc_callScriptedEventHandler;
 */
 #define BREAKER QGVAR(breaker)
