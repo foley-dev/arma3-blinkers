@@ -3,10 +3,10 @@
 #define LEFT_DIM "<t color='#006600' shadowColor='#006600' size='1.1' font='RobotoCondensedBold' shadow='2'>&lt;</t>&#160;&#160;&#160;Left Turn Signal <t color='#777777' size='1' font='RobotoCondensedBold'>[Z]</t>"
 #define RIGHT_LIT "<t color='#00ff00' shadowColor='#006600' size='1.1' font='RobotoCondensedBold' shadow='2'>&gt;</t>&#160;&#160;&#160;Right Turn Signal <t color='#777777' size='1' font='RobotoCondensedBold'>[C]</t>"
 #define RIGHT_DIM "<t color='#006600' shadowColor='#006600' size='1.1' font='RobotoCondensedBold' shadow='2'>&gt;</t>&#160;&#160;&#160;Right Turn Signal <t color='#777777' size='1' font='RobotoCondensedBold'>[C]</t>"
-#define HAZARDS_LIT "<t color='#ff8888' shadowColor='#bb0000' size='1.1' font='RobotoCondensedBold' shadow='2'>&lt;!&gt;</t> Hazard Lights"
-#define HAZARDS_DIM "<t color='#bb0000' shadowColor='#bb0000' size='1.1' font='RobotoCondensedBold' shadow='2'>&lt;!&gt;</t> Hazard Lights"
+#define HAZARDS_LIT "<t color='#ff8888' shadowColor='#bb0000' size='1.1' font='RobotoCondensedBold' shadow='2'>&lt;!&gt;</t> Hazard Lights <t color='#777777' size='1' font='RobotoCondensedBold'>[F]</t>"
+#define HAZARDS_DIM "<t color='#bb0000' shadowColor='#bb0000' size='1.1' font='RobotoCondensedBold' shadow='2'>&lt;!&gt;</t> Hazard Lights <t color='#777777' size='1' font='RobotoCondensedBold'>[F]</t>"
 #define BASE_PRIORITY 4040
-#define INTERACTION_COOLDOWN 0.25
+#define INTERACTION_COOLDOWN 0.2
 
 params ["_vehicle"];
 
@@ -102,12 +102,16 @@ GVAR(listenKeyDown) = {
 		{
 			params ["_displayOrControl", "_key", "_shift", "_ctrl", "_alt"];
 
-			if (_key != KEY_INTERACT_LEFT && _key != KEY_INTERACT_RIGHT) exitWith {};
+			if (_key != KEY_INTERACT_LEFT && _key != KEY_INTERACT_RIGHT && _key != KEY_INTERACT_HAZARDS) exitWith {};
 			if (driver vehicle player != player || !((vehicle player) in GVAR(managedVehicles))) exitWith {};
 			if (time < GVAR(lastInteractionTime) + INTERACTION_COOLDOWN) exitWith {};
 
 			GVAR(lastInteractionTime) = time;
-			private _interactionType = [INTERACT_LEFT, INTERACT_RIGHT] select (_key == KEY_INTERACT_RIGHT);
+			private _interactionType = switch (_key) do {
+				case KEY_INTERACT_LEFT: { INTERACT_LEFT };
+				case KEY_INTERACT_RIGHT: { INTERACT_RIGHT };
+				case KEY_INTERACT_HAZARDS: { INTERACT_HAZARDS };
+			};
 			[vehicle player, INTERACTED, [vehicle player, _interactionType]] call BIS_fnc_callScriptedEventHandler;
 		}
 	];

@@ -8,11 +8,12 @@
 
 // Keybindings
 
-// DIK_Z
+// Z
 #define KEY_INTERACT_LEFT 44
-
-// DIK_C
+// C
 #define KEY_INTERACT_RIGHT 46
+// F
+#define KEY_INTERACT_HAZARDS 33
 
 // Enums
 #define INTERACT_LEFT 1

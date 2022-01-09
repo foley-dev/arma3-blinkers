@@ -17,6 +17,9 @@ params ["_vehicle"];
 			] call BIS_fnc_callScriptedEventHandler;
 		};
 
+		if (_vehicle getVariable [QGVAR(breakerWorking), false]) exitWith {};
+		_vehicle setVariable [QGVAR(breakerWorking), true];
+
 		[_vehicle, _currentSetting] spawn {
 			params ["_vehicle", "_currentSetting"];
 
@@ -29,7 +32,7 @@ params ["_vehicle"];
 
 			private _circuitClosed = true;
 
-			while {alive _vehicle && _vehicle getVariable [QGVAR(setting), SETTING_OFF] == _currentSetting} do {
+			while {alive _vehicle && (_vehicle getVariable [QGVAR(setting), SETTING_OFF]) != SETTING_OFF} do {
 				[
 					_vehicle,
 					BREAKER,
@@ -40,6 +43,8 @@ params ["_vehicle"];
 				sleep _interval;
 				_circuitClosed = !_circuitClosed;
 			};
+			
+			_vehicle setVariable [QGVAR(breakerWorking), false];
 		};
 	}
 ] call BIS_fnc_addScriptedEventHandler;
