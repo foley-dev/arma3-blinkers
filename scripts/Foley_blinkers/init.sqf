@@ -57,6 +57,7 @@ if (!isNil "_this") then {
 
 [] spawn GVAR(listenKeyDown);
 call compile preprocessFileLineNumbers (BASE_DIR + "modules\dashboard.sqf");
+call compile preprocessFileLineNumbers (BASE_DIR + "modules\about.sqf");
 addMissionEventHandler [
 	"Draw3D",
 	{
@@ -67,7 +68,7 @@ addMissionEventHandler [
 				continue;
 			};
 
-			[_x, diag_frameNo % 2 == 0] call GVAR(fnc_adjustOffsets);
+			[_x] call GVAR(fnc_adjustOffsets);
 		} forEach GVAR(managedVehicles);
 
 		call GVAR(fnc_drawDashboard);

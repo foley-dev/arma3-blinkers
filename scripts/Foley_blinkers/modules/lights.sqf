@@ -177,8 +177,9 @@ if (isNil QGVAR(activeParticles)) then {
 ] call BIS_fnc_addScriptedEventHandler;
 
 GVAR(fnc_adjustOffsets) = {
-	params ["_vehicle", "_recalculateAdjustment"];
+	params ["_vehicle"];
 
+	if (diag_frameNo % 2 == 0) exitWith {};
 	if (abs speed _vehicle < 1) exitWith {};
 
 	{
