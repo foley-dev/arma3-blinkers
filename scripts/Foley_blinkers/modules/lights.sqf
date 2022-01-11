@@ -60,19 +60,19 @@ GVAR(fnc_rankLights) = {
 			continue;
 		};
 
-		if (_distance > 100) then {
-			_priority pushBack _light;
-			continue;
+		if (_distance < 100) then {
+			// This check is skipped for distant lights
+			private _lightPosASL = (getPosASLVisual _light) vectorAdd (
+				((getPosASLVisual _light) vectorFromTo (AGLToASL positionCameraToWorld [0, 0, 0])) vectorMultiply 0.2
+			);
+			private _canSee = [player, "VIEW"] checkVisibility [AGLToASL positionCameraToWorld [0, 0, 0], _lightPosASL];
+
+			if (_canSee < 0.01) then {
+				continue;
+			};
 		};
 
-		private _lightPosASL = (getPosASLVisual _light) vectorAdd (
-			((getPosASLVisual _light) vectorFromTo (AGLToASL positionCameraToWorld [0, 0, 0])) vectorMultiply 0.2
-		);
-		private _canSee = [player, "VIEW"] checkVisibility [AGLToASL positionCameraToWorld [0, 0, 0], _lightPosASL];
-
-		if (_canSee > 0.01) then {
-			_priority pushBack _light;
-		};
+		_priority pushBack _light;
 	} forEach _sorted;
 
 	GVAR(priorityLights) = _priority;
