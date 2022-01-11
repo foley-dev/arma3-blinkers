@@ -27,7 +27,7 @@ GVAR(fnc_initVehicle) = {
 	[_vehicle] call compile preprocessFileLineNumbers (BASE_DIR + "modules\audio.sqf");
 	[_vehicle] call compile preprocessFileLineNumbers (BASE_DIR + "modules\breaker.sqf");
 	[_vehicle] call compile preprocessFileLineNumbers (BASE_DIR + "modules\interaction.sqf");
-	// [_vehicle] call compile preprocessFileLineNumbers (BASE_DIR + "modules\debug.sqf");
+	[_vehicle] call compile preprocessFileLineNumbers (BASE_DIR + "modules\debug.sqf");
 	[_vehicle, _config] call compile preprocessFileLineNumbers (BASE_DIR + "modules\lights.sqf");
 
 	GVAR(managedVehicles) pushBack _vehicle;
@@ -56,7 +56,6 @@ if (!isNil "_this") then {
 } forEach _vehicles;
 
 [] spawn GVAR(listenKeyDown);
-
 call compile preprocessFileLineNumbers (BASE_DIR + "modules\dashboard.sqf");
 addMissionEventHandler [
 	"Draw3D",
@@ -64,66 +63,19 @@ addMissionEventHandler [
 		{
 			if (!alive _x) then {
 				GVAR(managedVehicles) = GVAR(managedVehicles) select {alive _x};
+				[_x, SETTING_OFF, true] call GVAR(fnc_applySetting);
 				continue;
 			};
 
-			if (abs speed _x > 1) then {
-				[_x, diag_frameNo % 2 == 0] call GVAR(fnc_adjustOffsets);
-			};
+			[_x, diag_frameNo % 2 == 0] call GVAR(fnc_adjustOffsets);
 		} forEach GVAR(managedVehicles);
 
 		call GVAR(fnc_drawDashboard);
 	}
 ];
-
-onEachFrame {
-	call GVAR(fnc_dropParticles);
+addMissionEventHandler [
+	"EachFrame",
+	{
+		call GVAR(fnc_dropParticles);
+	}
 };
-
-// Foley_reps = 10;
-// Foley_fps = 60;
-// Foley_offsetFactor = 1;
-// Foley_previousVelocity = velocity vehicle player;
-
-// addMissionEventHandler [
-// 	"EachFrame",
-// 	{
-// 		if (diag_frameNo % 10 == 0) then {
-// 			hintSilent ([
-// 				"fps", diag_fps, "", 
-// 				"min fps", diag_fpsMin, "", 
-// 				"reps", Foley_reps, "", 
-// 				"delta time", diag_deltaTime , "", 
-// 				"acceleration", ((vectorMagnitude (Foley_previousVelocity vectorDiff (velocity vehicle player))) / diag_deltaTime) toFixed 3
-// 			] joinString "\n");
-// 		};
-
-// 		Foley_previousVelocity = velocity vehicle player;
-// 		private _diff = (diag_fps - Foley_fps) / (1 max abs (diag_fps - Foley_fps));
-		
-// 		if (abs (Foley_fps - diag_fps) > 15) then {
-// 			_diff = _diff * 4;
-// 		};
-
-// 		if (abs (Foley_fps - diag_fps) > 10) then {
-// 			_diff = _diff * 4;
-// 		};
-
-// 		if (abs (Foley_fps - diag_fps) > 5) then {
-// 			_diff = _diff * 4;
-// 		};
-
-// 		if (diag_fps < Foley_fps) then {
-// 			_diff = _diff * 2;
-// 		};
-
-// 		_diff = round _diff;
-// 		Foley_reps = Foley_reps + _diff;
-// 		Foley_reps = Foley_reps min 10000;
-// 		Foley_reps = Foley_reps max 1;
-
-// 		for "_i" from 1 to Foley_reps do {
-//     		private _res = lineIntersectsSurfaces [eyePos player, [0,0,0], objNull, objNull, true, -1, "VIEW", "FIRE", false];
-// 		};
-// 	}
-// ];

@@ -5,6 +5,8 @@
 #define GVAR(var1) DOUBLES(NAMESPACE,var1)
 #define QGVAR(var1) QUOTE(GVAR(var1))
 #define BASE_DIR "scripts\Foley_blinkers\"
+#define DEBUG false
+#define DEBUG_FPS false
 
 // Keybindings
 

@@ -3,11 +3,11 @@
 params ["_vehicle"];
 
 GVAR(fnc_applySetting) = {
-	params ["_vehicle", "_setting"];
+	params ["_vehicle", "_setting", ["_force", false]];
 
 	private _previousSetting = _vehicle getVariable [QGVAR(setting), SETTING_OFF];
 
-	if (_setting != _previousSetting) then {
+	if (_setting != _previousSetting || _force) then {
 		_vehicle setVariable [QGVAR(setting), _setting, true];
 		[
 			_vehicle,

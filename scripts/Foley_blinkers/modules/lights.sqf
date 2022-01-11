@@ -35,7 +35,12 @@ if (isNil QGVAR(priorityLights)) then {
 };
 
 GVAR(fnc_rankLights) = {
-	private _sorted = [GVAR(activeLights), [positionCameraToWorld [0, 0, 0]], {_input0 distanceSqr _x}, "ASCEND"] call BIS_fnc_sortBy;
+	private _sorted = [
+		GVAR(activeLights),
+		[positionCameraToWorld [0, 0, 0]],
+		{_input0 distanceSqr _x},
+		"ASCEND"
+	] call BIS_fnc_sortBy;
 	private _priority = [];
 
 	{
@@ -77,19 +82,30 @@ GVAR(fnc_rankLights) = {
 
 	GVAR(priorityLights) = _priority;
 
-	// {
-	// 	private _color = [
-	// 		[0, 1, 0, 1],
-	// 		[1, 1, 0, 1],
-	// 		[0, 0, 0, 0.1]
-	// 	] select _forEachIndex;
+	if (DEBUG) then {
+		{
+			private _color = [
+				[0, 1, 0, 1],
+				[1, 1, 0, 1],
+				[0, 0, 0, 0.1]
+			] select _forEachIndex;
 
-	// 	{
-	// 		drawLine3D [positionCameraToWorld [0.1, -1.5, 0], getPosVisual _x, _color];
-	// 	} forEach _x;
-	// } forEach [_priority];
+			{
+				drawLine3D [positionCameraToWorld [0.1, -1.5, 0], getPosVisual _x, _color];
+			} forEach _x;
+		} forEach [_priority];
 
-	// hintSilent (["priority", count _priority, "\nall lights", count GVAR(activeLights), "\nall particles", count GVAR(activeParticles)] joinString "\n");
+		hintSilent (
+			[
+				"priority lights",
+				count _priority,
+				"\nall lights",
+				count GVAR(activeLights),
+				"\nall particles",
+				count GVAR(activeParticles)
+			] joinString "\n"
+		);
+	};
 };
 
 GVAR(lightsLookup) = [
@@ -162,6 +178,8 @@ if (isNil QGVAR(activeParticles)) then {
 
 GVAR(fnc_adjustOffsets) = {
 	params ["_vehicle", "_recalculateAdjustment"];
+
+	if (abs speed _vehicle < 1) exitWith {};
 
 	{
 		private _light = _vehicle getVariable (QGVAR(light) + _x);

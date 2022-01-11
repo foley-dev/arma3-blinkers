@@ -5,6 +5,9 @@
 #define RED_DIM [0.7, 0, 0, 0.67]
 #define REFERENCE_SIZE 0.1
 #define REFERENCE_DISTANCE 0.5
+#define SYMBOL_LEFT "<"
+#define SYMBOL_RIGHT ">"
+#define SYMBOL_HAZARDS "<!>"
 
 GVAR(fnc_drawDashboard) = {
 	if (!((vehicle player) in GVAR(managedVehicles)) || cameraView != "INTERNAL") exitWith {};
@@ -22,6 +25,7 @@ GVAR(fnc_drawDashboard) = {
 	private _colorRight = [GREEN_DIM, GREEN_LIT] select (_state == SETTING_RIGHT || _state == SETTING_HAZARDS);
 
 	if (driver _vehicle != player) then {
+		// Dim icons for passengers
 		_colorLeft set [3, (_colorLeft select 3) / 2];
 		_colorHazards set [3, (_colorHazards select 3) / 2];
 		_colorRight set [3, (_colorRight select 3) / 2];
@@ -51,7 +55,7 @@ GVAR(fnc_drawDashboard) = {
 	);
 	_size = parseNumber (_size toFixed 2);
 
-	drawIcon3D ["", _colorLeft, _vehicle modelToWorldVisual _offsetLeft, 0, 0, 0, "<", 2, _size, "RobotoCondensedBold"];
-	drawIcon3D ["", _colorHazards, _vehicle modelToWorldVisual _offsetHazards, 0, 0, 0, "<!>", 2, 0.7 * _size, "RobotoCondensedBold"];
-	drawIcon3D ["", _colorRight, _vehicle modelToWorldVisual _offsetRight, 0, 0, 0, ">", 2, _size, "RobotoCondensedBold"];
+	drawIcon3D ["", _colorLeft, _vehicle modelToWorldVisual _offsetLeft, 0, 0, 0, SYMBOL_LEFT, 2, _size, "RobotoCondensedBold"];
+	drawIcon3D ["", _colorHazards, _vehicle modelToWorldVisual _offsetHazards, 0, 0, 0, SYMBOL_HAZARDS, 2, 0.7 * _size, "RobotoCondensedBold"];
+	drawIcon3D ["", _colorRight, _vehicle modelToWorldVisual _offsetRight, 0, 0, 0, SYMBOL_RIGHT, 2, _size, "RobotoCondensedBold"];
 };
