@@ -158,7 +158,7 @@ if (isNil QGVAR(activeParticles)) then {
 		{
 			private _light = _vehicle getVariable [(QGVAR(light) + _x), objNull];
 
-			if (_light in GVAR(priorityLights)) then {
+			if (_light in GVAR(priorityLights) && isNull attachedTo _vehicle) then {
 				_light setLightIntensity _intensity;
 			} else {
 				_light setLightIntensity 0;
@@ -179,7 +179,6 @@ if (isNil QGVAR(activeParticles)) then {
 GVAR(fnc_adjustOffsets) = {
 	params ["_vehicle"];
 
-	if (diag_frameNo % 2 == 0) exitWith {};
 	if (abs speed _vehicle < 1) exitWith {};
 
 	{
@@ -194,7 +193,7 @@ GVAR(fnc_adjustOffsets) = {
 		private _adjustedPosASL = _posASL vectorAdd _adjustment;
 		_light setPosASL _adjustedPosASL;
 
-		if (_recalculateAdjustment && _light in GVAR(activeLights)) then {
+		if (diag_frameNo % 2 == 0 && _light in GVAR(activeLights)) then {
 			private _diff = _posASL vectorDiff (getPosASLVisual _tracker);
 			_adjustment = _adjustment vectorAdd (_diff vectorMultiply 0.999);
 			_vehicle setVariable [QGVAR(lightAdjustment) + _x, _adjustment];

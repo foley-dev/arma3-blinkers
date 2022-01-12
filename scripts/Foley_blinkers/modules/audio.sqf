@@ -1,6 +1,8 @@
 #include "..\macros.hpp"
-#define TOGGLE_SOUND "RHS_SwitchToggle"
-#define BREAKER_SOUND "RHS_ButtonPress"
+#define SWITCH_ON "Foley_blinkers_switchOn"
+#define SWITCH_OFF "Foley_blinkers_switchOff"
+#define BREAKER_ON "Foley_blinkers_breakerOn"
+#define BREAKER_OFF "Foley_blinkers_breakerOff"
 
 params ["_vehicle"];
 
@@ -22,11 +24,12 @@ GVAR(fnc_playSound) = {
 
 [
 	_vehicle,
-	INTERACTED,
+	SETTING_CHANGED,
 	{
 		params ["_vehicle", "_interactionType"];
 
-		[_vehicle, TOGGLE_SOUND] call GVAR(fnc_playSound);
+		private _sound = [SWITCH_ON, SWITCH_OFF] select (_interactionType == SETTING_OFF);
+		[_vehicle, _sound] call GVAR(fnc_playSound);
 	}
 ] call BIS_fnc_addScriptedEventHandler;
 
@@ -35,9 +38,8 @@ GVAR(fnc_playSound) = {
 	BREAKER,
 	{
 		params ["_vehicle", "_circuitClosed"];
-
-		if (_circuitClosed) then {
-			[_vehicle, BREAKER_SOUND] call GVAR(fnc_playSound);
-		};
+		
+		private _sound = [BREAKER_ON, BREAKER_OFF] select _circuitClosed;
+		[_vehicle, _sound] call GVAR(fnc_playSound);
 	}
 ] call BIS_fnc_addScriptedEventHandler;

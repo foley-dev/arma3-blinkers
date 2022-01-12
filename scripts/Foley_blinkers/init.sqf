@@ -79,4 +79,4 @@ addMissionEventHandler [
 	{
 		call GVAR(fnc_dropParticles);
 	}
-};
+];

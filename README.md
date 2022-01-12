@@ -10,12 +10,13 @@ Turn signals script for Arma 3
     * <kbd>C</kbd> - right indicator
     * <kbd>F</kbd> - hazard lights
 * Multiplayer support
-* Optimized to handle many vehicles even on low graphics settings
+* Optimized to handle many vehicles, also on low graphics settings
 
 ## Quick start
 
 1. Copy the `Foley_blinkers` folder to your scenario: `scripts\Foley_blinkers\`
-2. Add to your scenario's `init.sqf`:
+2. Copy contents of `description.ext` to your scenario.
+3. Add to your scenario's `init.sqf`:
     ```sqf
     execVM "scripts\Foley_blinkers\init.sqf";
     ```
@@ -108,4 +109,4 @@ The script comes with configuration for several vehicles. To add support for any
 ]
 ```
 
-**Pull requests are welcome!**
+Pull requests are welcome!

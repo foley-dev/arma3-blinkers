@@ -1,0 +1,45 @@
+class CfgSounds
+{
+	sounds[] = {};
+
+	class Foley_blinkers_switchOn
+	{
+		name = "Foley_blinkers_switchOn";
+		sound[] = { "scripts\Foley_blinkers\assets\switch_on.ogg", 0.8, 1 };
+		titles[] = {};
+	};
+
+	class Foley_blinkers_switchOff
+	{
+		name = "Foley_blinkers_switchOff";
+		sound[] = { "scripts\Foley_blinkers\assets\switch_off.ogg", 0.8, 1 };
+		titles[] = {};
+	};
+	
+	class Foley_blinkers_breakerOn
+	{
+		name = "Foley_blinkers_breakerOn";
+		sound[] = { "scripts\Foley_blinkers\assets\breaker_on.ogg", 2, 1 };
+		titles[] = {};
+	};
+
+	class Foley_blinkers_breakerOff
+	{
+		name = "Foley_blinkers_breakerOff";
+		sound[] = { "scripts\Foley_blinkers\assets\breaker_off.ogg", 2, 1 };
+		titles[] = {};
+	};
+};
+
+class CfgRemoteExec
+{
+	class Commands
+	{
+		mode = 2;
+	};
+
+	class Functions
+	{
+		mode = 2;
+	};
+};
