@@ -13,8 +13,16 @@ GVAR(fnc_initAudioForVehicle) = {
 		{
 			params ["_vehicle", "_interactionType"];
 
-			private _sound = [SWITCH_ON, SWITCH_OFF] select (_interactionType == SETTING_OFF);
-			[_vehicle, _sound] call GVAR(fnc_playSound);
+			private _currentlyOn = _interactionType != SETTING_OFF;
+			private _previouslyOn = (_vehicle getVariable [QGVAR(setting), SETTING_OFF]) != SETTING_OFF;
+
+			if (_previouslyOn) then {
+				[_vehicle, SWITCH_OFF] call GVAR(fnc_playSound);
+			};
+
+			if (_currentlyOn) then {
+				[_vehicle, SWITCH_ON] call GVAR(fnc_playSound);
+			};
 		}
 	] call BIS_fnc_addScriptedEventHandler;
 

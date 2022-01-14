@@ -24,12 +24,12 @@ GVAR(fnc_applySetting) = {
 	private _previousSetting = _vehicle getVariable [QGVAR(setting), SETTING_OFF];
 
 	if (_setting != _previousSetting || _force) then {
-		_vehicle setVariable [QGVAR(setting), _setting, true];
 		[
 			_vehicle,
 			SETTING_CHANGED,
 			[_vehicle, _setting, _previousSetting]
 		] remoteExecCall ["BIS_fnc_callScriptedEventHandler", 0, false];
+		_vehicle setVariable [QGVAR(setting), _setting, true];
 	};
 };
 

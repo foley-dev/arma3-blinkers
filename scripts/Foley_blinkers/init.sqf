@@ -65,13 +65,12 @@ GVAR(fnc_initVehicle) = {
 	GVAR(managedVehicles) pushBack _vehicle;
 };
 
-GVAR(fnc_normalizeVehicleList) = {
-	if (isNil "_this") exitWith {
-		vehicles select {typeOf _x in GVAR(config)}
-	};
 
-	private _vehicles = [];
+private _vehicles = [];
 
+if (isNil "_this") then {
+	_vehicles = vehicles select {typeOf _x in GVAR(config)};
+} else {
 	{
 		private _item = _x;
 
@@ -85,10 +84,8 @@ GVAR(fnc_normalizeVehicleList) = {
 			} forEach (vehicles select {typeOf _x == _item})
 		};
 	} forEach _this;
-
-	_vehicles
 };
 
 {
 	[_x] call GVAR(fnc_initVehicle);
-} forEach (_this call GVAR(fnc_normalizeVehicleList));
+} forEach _vehicles;
