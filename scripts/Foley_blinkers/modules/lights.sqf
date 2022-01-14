@@ -186,7 +186,7 @@ GVAR(fnc_adjustOffsets) = {
 		private _adjustedPosASL = _posASL vectorAdd _adjustment;
 		_light setPosASL _adjustedPosASL;
 
-		if (diag_frameNo % 2 == 0 && _light in GVAR(activeLights)) then {
+		if (diag_frameNo % 2 == 0) then {
 			private _diff = _posASL vectorDiff (getPosASLVisual _tracker);
 			_adjustment = _adjustment vectorAdd (_diff vectorMultiply 0.999);
 			_vehicle setVariable [QGVAR(lightAdjustment) + _x, _adjustment];
