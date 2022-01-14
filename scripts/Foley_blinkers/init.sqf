@@ -1,19 +1,52 @@
 #include "macros.hpp"
 
-GVAR(config) = createHashMap;
-GVAR(fnc_loadConfig) = {
-	{
-		private _config = parseSimpleArray preprocessFile (BASE_DIR + "config\" + _x);
-		GVAR(config) merge (createHashMapFromArray _config);
-	} forEach ["bis.sqf", "uk3cb.sqf", "extras.sqf"];
+if (!hasInterface) exitWith {};
 
-	{
-		GVAR(config) set [_x, createHashMapFromArray (GVAR(config) get _x)];
-	} forEach keys GVAR(config);
+if (isNil QGVAR(initiated)) then {
+	GVAR(initiated) = false;
+
+	call compile preprocessFileLineNumbers (BASE_DIR + "modules\about.sqf");
+	call compile preprocessFileLineNumbers (BASE_DIR + "modules\actions.sqf");
+	call compile preprocessFileLineNumbers (BASE_DIR + "modules\audio.sqf");
+	call compile preprocessFileLineNumbers (BASE_DIR + "modules\breaker.sqf");
+	call compile preprocessFileLineNumbers (BASE_DIR + "modules\config.sqf");
+	call compile preprocessFileLineNumbers (BASE_DIR + "modules\dashboard.sqf");
+	call compile preprocessFileLineNumbers (BASE_DIR + "modules\debug.sqf");
+	call compile preprocessFileLineNumbers (BASE_DIR + "modules\interaction.sqf");
+	call compile preprocessFileLineNumbers (BASE_DIR + "modules\lights.sqf");
+
+	GVAR(managedVehicles) = [];
+	call GVAR(fnc_loadConfig);
+	call GVAR(fnc_addAboutSection);
+	[] spawn GVAR(initKeydownListener);
+
+	addMissionEventHandler [
+		"Draw3D",
+		{
+			{
+				if (!alive _x) then {
+					[_x, SETTING_OFF, true] call GVAR(fnc_applySetting);
+					GVAR(managedVehicles) = GVAR(managedVehicles) select {alive _x};
+					continue;
+				};
+
+				[_x] call GVAR(fnc_adjustOffsets);
+			} forEach GVAR(managedVehicles);
+
+			call GVAR(fnc_drawDashboard);
+		}
+	];
+
+	addMissionEventHandler [
+		"EachFrame",
+		{
+			call GVAR(fnc_dropParticles);
+		}
+	];
+
+	GVAR(initiated) = true;
 };
-call GVAR(fnc_loadConfig);
 
-GVAR(managedVehicles) = [];
 GVAR(fnc_initVehicle) = {
 	params ["_vehicle"];
 
@@ -23,60 +56,39 @@ GVAR(fnc_initVehicle) = {
 
 	if (isNil "_config") exitWith {};
 
-	[_vehicle] call compile preprocessFileLineNumbers (BASE_DIR + "modules\actions.sqf");
-	[_vehicle] call compile preprocessFileLineNumbers (BASE_DIR + "modules\audio.sqf");
-	[_vehicle] call compile preprocessFileLineNumbers (BASE_DIR + "modules\breaker.sqf");
-	[_vehicle] call compile preprocessFileLineNumbers (BASE_DIR + "modules\interaction.sqf");
-	[_vehicle] call compile preprocessFileLineNumbers (BASE_DIR + "modules\debug.sqf");
-	[_vehicle, _config] call compile preprocessFileLineNumbers (BASE_DIR + "modules\lights.sqf");
+	[_vehicle] call GVAR(fnc_initActionsForVehicle);
+	[_vehicle] call GVAR(fnc_initAudioForVehicle);
+	[_vehicle] call GVAR(fnc_initBreakerForVehicle);
+	[_vehicle] call GVAR(fnc_initInteractionsForVehicle);
+	[_vehicle, _config] call GVAR(fnc_initLightsForVehicle);
 
 	GVAR(managedVehicles) pushBack _vehicle;
 };
 
-private _vehicles = [];
+GVAR(fnc_normalizeVehicleList) = {
+	if (isNil "_this") exitWith {
+		vehicles select {typeOf _x in GVAR(config)}
+	};
 
-if (!isNil "_this") then {
-	_vehicles = _this;
-} else {
-	_vehicles = vehicles select {typeOf _x in GVAR(config)};
+	private _vehicles = [];
+
+	{
+		private _item = _x;
+
+		if (_item isEqualType objNull) then {
+			_vehicles pushBackUnique _item;
+		};
+
+		if (_item isEqualType "") then {
+			{
+				_vehicles pushBackUnique _x;
+			} forEach (vehicles select {typeOf _x == _item})
+		};
+	} forEach _this;
+
+	_vehicles
 };
 
 {
-	private _v = _x;
-
-	if (_x isEqualType "") then {
-		{
-			[_x] call GVAR(fnc_initVehicle);
-		} forEach (vehicles select {typeOf _x == _v})
-	};
-	
-	if (_x isEqualType objNull) then {
-		[_x] call GVAR(fnc_initVehicle);
-	};
-} forEach _vehicles;
-
-[] spawn GVAR(listenKeyDown);
-call compile preprocessFileLineNumbers (BASE_DIR + "modules\dashboard.sqf");
-call compile preprocessFileLineNumbers (BASE_DIR + "modules\about.sqf");
-addMissionEventHandler [
-	"Draw3D",
-	{
-		{
-			if (!alive _x) then {
-				GVAR(managedVehicles) = GVAR(managedVehicles) select {alive _x};
-				[_x, SETTING_OFF, true] call GVAR(fnc_applySetting);
-				continue;
-			};
-
-			[_x] call GVAR(fnc_adjustOffsets);
-		} forEach GVAR(managedVehicles);
-
-		call GVAR(fnc_drawDashboard);
-	}
-];
-addMissionEventHandler [
-	"EachFrame",
-	{
-		call GVAR(fnc_dropParticles);
-	}
-];
+	[_x] call GVAR(fnc_initVehicle);
+} forEach (_this call GVAR(fnc_normalizeVehicleList));

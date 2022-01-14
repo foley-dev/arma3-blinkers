@@ -1,6 +1,22 @@
 #include "..\macros.hpp"
 
-params ["_vehicle"];
+GVAR(fnc_initInteractionsForVehicle) = {
+	params ["_vehicle"];
+	
+	[
+		_vehicle,
+		INTERACTED,
+		{
+			params ["_vehicle", "_interactionType"];
+
+			private _previousSetting = _vehicle getVariable [QGVAR(setting), SETTING_OFF];
+			private _setting = [SETTING_OFF, _interactionType] select (_interactionType != _previousSetting);
+			[_vehicle, _setting] call GVAR(fnc_applySetting);
+		}
+	] call BIS_fnc_addScriptedEventHandler;
+
+	[_vehicle] spawn GVAR(automaticHazards);
+};
 
 GVAR(fnc_applySetting) = {
 	params ["_vehicle", "_setting", ["_force", false]];
@@ -16,18 +32,6 @@ GVAR(fnc_applySetting) = {
 		] remoteExecCall ["BIS_fnc_callScriptedEventHandler", 0, false];
 	};
 };
-
-[
-	_vehicle,
-	INTERACTED,
-	{
-		params ["_vehicle", "_interactionType"];
-
-		private _previousSetting = _vehicle getVariable [QGVAR(setting), SETTING_OFF];
-		private _setting = [SETTING_OFF, _interactionType] select (_interactionType != _previousSetting);
-		[_vehicle, _setting] call GVAR(fnc_applySetting);
-	}
-] call BIS_fnc_addScriptedEventHandler;
 
 GVAR(automaticHazards) = {
 	params ["_vehicle"];
@@ -50,5 +54,3 @@ GVAR(automaticHazards) = {
 		[_vehicle] spawn GVAR(automaticHazards);
 	};
 };
-
-[_vehicle] spawn GVAR(automaticHazards);

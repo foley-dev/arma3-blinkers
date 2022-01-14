@@ -1,10 +1,34 @@
 #include "..\macros.hpp"
-#define SWITCH_ON "Foley_blinkers_switchOn"
-#define SWITCH_OFF "Foley_blinkers_switchOff"
-#define BREAKER_ON "Foley_blinkers_breakerOn"
-#define BREAKER_OFF "Foley_blinkers_breakerOff"
+#define SWITCH_ON QGVAR(switchOn)
+#define SWITCH_OFF QGVAR(switchOff)
+#define BREAKER_ON QGVAR(breakerOn)
+#define BREAKER_OFF QGVAR(breakerOff)
 
-params ["_vehicle"];
+GVAR(fnc_initAudioForVehicle) = {
+	params ["_vehicle"];
+	
+	[
+		_vehicle,
+		SETTING_CHANGED,
+		{
+			params ["_vehicle", "_interactionType"];
+
+			private _sound = [SWITCH_ON, SWITCH_OFF] select (_interactionType == SETTING_OFF);
+			[_vehicle, _sound] call GVAR(fnc_playSound);
+		}
+	] call BIS_fnc_addScriptedEventHandler;
+
+	[
+		_vehicle,
+		BREAKER,
+		{
+			params ["_vehicle", "_circuitClosed"];
+			
+			private _sound = [BREAKER_ON, BREAKER_OFF] select _circuitClosed;
+			[_vehicle, _sound] call GVAR(fnc_playSound);
+		}
+	] call BIS_fnc_addScriptedEventHandler;
+};
 
 GVAR(fnc_playSound) = {
 	params ["_vehicle", "_sound"];
@@ -21,25 +45,3 @@ GVAR(fnc_playSound) = {
 		playSound _sound;  // Amplify sound when engine on
 	};
 };
-
-[
-	_vehicle,
-	SETTING_CHANGED,
-	{
-		params ["_vehicle", "_interactionType"];
-
-		private _sound = [SWITCH_ON, SWITCH_OFF] select (_interactionType == SETTING_OFF);
-		[_vehicle, _sound] call GVAR(fnc_playSound);
-	}
-] call BIS_fnc_addScriptedEventHandler;
-
-[
-	_vehicle,
-	BREAKER,
-	{
-		params ["_vehicle", "_circuitClosed"];
-		
-		private _sound = [BREAKER_ON, BREAKER_OFF] select _circuitClosed;
-		[_vehicle, _sound] call GVAR(fnc_playSound);
-	}
-] call BIS_fnc_addScriptedEventHandler;

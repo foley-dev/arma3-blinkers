@@ -8,91 +8,93 @@
 #define BASE_PRIORITY 4040
 #define INTERACTION_COOLDOWN 0.2
 
-params ["_vehicle"];
-
 GVAR(lastInteractionTime) = time;
 
-private _actionLeft = _vehicle addAction [
-	LEFT_DIM,
-	{
-		params ["_target", "_caller", "_actionId", "_arguments"];
+GVAR(fnc_initActionsForVehicle) = {
+	params ["_vehicle"];
 
-		if (time < GVAR(lastInteractionTime) + INTERACTION_COOLDOWN) exitWith {};
-   		[_target, INTERACTED, [_target, INTERACT_LEFT]] call BIS_fnc_callScriptedEventHandler;
-	},
-	nil,
-	BASE_PRIORITY + 0.2,
-	false,
-	false,
-	"",
-	"driver _target == _this",
-	5
-];
+	private _actionLeft = _vehicle addAction [
+		LEFT_DIM,
+		{
+			params ["_target", "_caller", "_actionId", "_arguments"];
 
-private _actionRight = _vehicle addAction [
-	RIGHT_DIM,
-	{
-		params ["_target", "_caller", "_actionId", "_arguments"];
+			if (time < GVAR(lastInteractionTime) + INTERACTION_COOLDOWN) exitWith {};
+			[_target, INTERACTED, [_target, INTERACT_LEFT]] call BIS_fnc_callScriptedEventHandler;
+		},
+		nil,
+		BASE_PRIORITY + 0.2,
+		false,
+		false,
+		"",
+		"driver _target == _this",
+		5
+	];
 
-		if (time < GVAR(lastInteractionTime) + INTERACTION_COOLDOWN) exitWith {};
-   		[_target, INTERACTED, [_target, INTERACT_RIGHT]] call BIS_fnc_callScriptedEventHandler;
-	},
-	nil,
-	BASE_PRIORITY + 0.1,
-	false,
-	false,
-	"",
-	"driver _target == _this",
-	5
-];
+	private _actionRight = _vehicle addAction [
+		RIGHT_DIM,
+		{
+			params ["_target", "_caller", "_actionId", "_arguments"];
 
-private _actionHazards = _vehicle addAction [
-	HAZARDS_DIM,
-	{
-		params ["_target", "_caller", "_actionId", "_arguments"];
+			if (time < GVAR(lastInteractionTime) + INTERACTION_COOLDOWN) exitWith {};
+			[_target, INTERACTED, [_target, INTERACT_RIGHT]] call BIS_fnc_callScriptedEventHandler;
+		},
+		nil,
+		BASE_PRIORITY + 0.1,
+		false,
+		false,
+		"",
+		"driver _target == _this",
+		5
+	];
 
-		if (time < GVAR(lastInteractionTime) + INTERACTION_COOLDOWN) exitWith {};
-   		[_target, INTERACTED, [_target, INTERACT_HAZARDS]] call BIS_fnc_callScriptedEventHandler;
-	},
-	nil,
-	BASE_PRIORITY,
-	false,
-	false,
-	"",
-	"driver _target == _this",
-	5
-];
+	private _actionHazards = _vehicle addAction [
+		HAZARDS_DIM,
+		{
+			params ["_target", "_caller", "_actionId", "_arguments"];
 
-_vehicle setVariable [QGVAR(actionLeft), _actionLeft];
-_vehicle setVariable [QGVAR(actionRight), _actionRight];
-_vehicle setVariable [QGVAR(actionHazards), _actionHazards];
+			if (time < GVAR(lastInteractionTime) + INTERACTION_COOLDOWN) exitWith {};
+			[_target, INTERACTED, [_target, INTERACT_HAZARDS]] call BIS_fnc_callScriptedEventHandler;
+		},
+		nil,
+		BASE_PRIORITY,
+		false,
+		false,
+		"",
+		"driver _target == _this",
+		5
+	];
 
-[
-	_vehicle,
-	BREAKER,
-	{
-		params ["_vehicle", "_circuitClosed"];
+	_vehicle setVariable [QGVAR(actionLeft), _actionLeft];
+	_vehicle setVariable [QGVAR(actionRight), _actionRight];
+	_vehicle setVariable [QGVAR(actionHazards), _actionHazards];
 
-		private _setting = _vehicle getVariable [QGVAR(setting), SETTING_OFF];
+	[
+		_vehicle,
+		BREAKER,
+		{
+			params ["_vehicle", "_circuitClosed"];
 
-		_vehicle setUserActionText [
-			_vehicle getVariable QGVAR(actionLeft),
-			[LEFT_DIM, LEFT_LIT] select ((_setting == SETTING_LEFT || _setting == SETTING_HAZARDS) && _circuitClosed)
-		];
+			private _setting = _vehicle getVariable [QGVAR(setting), SETTING_OFF];
 
-		_vehicle setUserActionText [
-			_vehicle getVariable QGVAR(actionRight),
-			[RIGHT_DIM, RIGHT_LIT] select ((_setting == SETTING_RIGHT || _setting == SETTING_HAZARDS) && _circuitClosed)
-		];
+			_vehicle setUserActionText [
+				_vehicle getVariable QGVAR(actionLeft),
+				[LEFT_DIM, LEFT_LIT] select ((_setting == SETTING_LEFT || _setting == SETTING_HAZARDS) && _circuitClosed)
+			];
 
-		_vehicle setUserActionText [
-			_vehicle getVariable QGVAR(actionHazards),
-			[HAZARDS_DIM, HAZARDS_LIT] select (_setting == SETTING_HAZARDS && _circuitClosed)
-		];
-	}
-] call BIS_fnc_addScriptedEventHandler;
+			_vehicle setUserActionText [
+				_vehicle getVariable QGVAR(actionRight),
+				[RIGHT_DIM, RIGHT_LIT] select ((_setting == SETTING_RIGHT || _setting == SETTING_HAZARDS) && _circuitClosed)
+			];
 
-GVAR(listenKeyDown) = {
+			_vehicle setUserActionText [
+				_vehicle getVariable QGVAR(actionHazards),
+				[HAZARDS_DIM, HAZARDS_LIT] select (_setting == SETTING_HAZARDS && _circuitClosed)
+			];
+		}
+	] call BIS_fnc_addScriptedEventHandler;
+};
+
+GVAR(initKeydownListener) = {
 	waitUntil {
 		!isNull (findDisplay 46)
 	};
