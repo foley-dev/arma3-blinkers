@@ -29,10 +29,9 @@ if (DEBUG) then {
 };
 
 if (DEBUG_FPS) then {
-	Foley_reps = 10;
-	Foley_fps = 60;
-	Foley_offsetFactor = 1;
-	Foley_previousVelocity = velocity vehicle player;
+	GVAR(debugFpsReps) = 10;
+	GVAR(debugFpsTarget) = 60;
+	GVAR(debugFpsPreviousVelocity) = velocity vehicle player;
 
 	addMissionEventHandler [
 		"EachFrame",
@@ -41,37 +40,37 @@ if (DEBUG_FPS) then {
 				hintSilent ([
 					"fps", diag_fps, "", 
 					"min fps", diag_fpsMin, "", 
-					"reps", Foley_reps, "", 
+					"reps", GVAR(debugFpsReps), "", 
 					"delta time", diag_deltaTime , "", 
-					"acceleration", ((vectorMagnitude (Foley_previousVelocity vectorDiff (velocity vehicle player))) / diag_deltaTime) toFixed 3
+					"acceleration", ((vectorMagnitude (GVAR(debugFpsPreviousVelocity) vectorDiff (velocity vehicle player))) / diag_deltaTime) toFixed 3
 				] joinString "\n");
 			};
 
-			Foley_previousVelocity = velocity vehicle player;
-			private _diff = (diag_fps - Foley_fps) / (1 max abs (diag_fps - Foley_fps));
+			GVAR(debugFpsPreviousVelocity) = velocity vehicle player;
+			private _diff = (diag_fps - GVAR(debugFpsTarget)) / (1 max abs (diag_fps - GVAR(debugFpsTarget)));
 			
-			if (abs (Foley_fps - diag_fps) > 15) then {
+			if (abs (GVAR(debugFpsTarget) - diag_fps) > 15) then {
 				_diff = _diff * 4;
 			};
 
-			if (abs (Foley_fps - diag_fps) > 10) then {
+			if (abs (GVAR(debugFpsTarget) - diag_fps) > 10) then {
 				_diff = _diff * 4;
 			};
 
-			if (abs (Foley_fps - diag_fps) > 5) then {
+			if (abs (GVAR(debugFpsTarget) - diag_fps) > 5) then {
 				_diff = _diff * 4;
 			};
 
-			if (diag_fps < Foley_fps) then {
+			if (diag_fps < GVAR(debugFpsTarget)) then {
 				_diff = _diff * 2;
 			};
 
 			_diff = round _diff;
-			Foley_reps = Foley_reps + _diff;
-			Foley_reps = Foley_reps min 10000;
-			Foley_reps = Foley_reps max 1;
+			GVAR(debugFpsReps) = GVAR(debugFpsReps) + _diff;
+			GVAR(debugFpsReps) = GVAR(debugFpsReps) min 10000;
+			GVAR(debugFpsReps) = GVAR(debugFpsReps) max 1;
 
-			for "_i" from 1 to Foley_reps do {
+			for "_i" from 1 to GVAR(debugFpsReps) do {
 				private _res = lineIntersectsSurfaces [eyePos player, [0,0,0], objNull, objNull, true, -1, "VIEW", "FIRE", false];
 			};
 		}

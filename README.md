@@ -15,13 +15,17 @@ Turn signals script for Arma 3
 ## Quick start
 
 1. Copy the `Foley_blinkers` folder to your scenario: `scripts\Foley_blinkers\`
-2. Copy contents of `description.ext` to your scenario.
+2. Copy contents of `description.ext` to your scenario's `description.ext`.
 3. Add to your scenario's `init.sqf`:
     ```sqf
     execVM "scripts\Foley_blinkers\init.sqf";
     ```
 
 ## Advanced usage
+
+### Multiplayer considerations
+
+The initialization script must be ran on every client. However, in order to change state of the blinkers (`Foley_blinkers_fnc_applySetting`), it's enough to call it on one machine as it will propagate to all clients, provided that your `CfgRemoteExec` doesn't prevent it.
 
 ### Initialization
 
@@ -31,9 +35,11 @@ If you need to limit which vehicles should be affected, you can pass an array to
 [myCar, myCar2, "I_Truck_02_box_F"] execVM "scripts\Foley_blinkers\init.sqf";
 ```
 
-will initiate blinkers for `myCar`, `myCar2` and all vehicles of type `"I_Truck_02_box_F"`.
+will initiate blinkers for `myCar`, `myCar2` and all vehicles of type `"I_Truck_02_box_F"`.\
+You may also add more vehicles later by running the init script again. It's okay to run it multiple times for the same vehicle.
 
-### Turn on programatically
+
+### Set blinkers programatically
 
 You can turn the blinkers on and off by calling a function:
 
@@ -44,8 +50,7 @@ You can turn the blinkers on and off by calling a function:
 [myCar, 4] call Foley_blinkers_fnc_applySetting;  // off
 ```
 
-In multiplayer, this will propagate to all clients.\
-Before calling this function, ensure that the script has already been  initialized on all machines.
+In multiplayer, this will propagate to all clients. Before calling this function, ensure that the script has already been initialized on *all* machines.
 
 ### Events
 

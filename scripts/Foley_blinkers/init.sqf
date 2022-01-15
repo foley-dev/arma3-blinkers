@@ -1,48 +1,53 @@
 #include "macros.hpp"
 
-if (!hasInterface) exitWith {};
-
 if (isNil QGVAR(initiated)) then {
 	GVAR(initiated) = false;
 
-	call compile preprocessFileLineNumbers (BASE_DIR + "modules\about.sqf");
-	call compile preprocessFileLineNumbers (BASE_DIR + "modules\actions.sqf");
-	call compile preprocessFileLineNumbers (BASE_DIR + "modules\audio.sqf");
-	call compile preprocessFileLineNumbers (BASE_DIR + "modules\breaker.sqf");
-	call compile preprocessFileLineNumbers (BASE_DIR + "modules\config.sqf");
-	call compile preprocessFileLineNumbers (BASE_DIR + "modules\dashboard.sqf");
-	call compile preprocessFileLineNumbers (BASE_DIR + "modules\debug.sqf");
-	call compile preprocessFileLineNumbers (BASE_DIR + "modules\interaction.sqf");
-	call compile preprocessFileLineNumbers (BASE_DIR + "modules\lights.sqf");
+	{	
+		call compile preprocessFileLineNumbers (BASE_DIR + _x);
+	} forEach [
+		"modules\about.sqf",
+		"modules\actions.sqf",
+		"modules\audio.sqf",
+		"modules\breaker.sqf",
+		"modules\config.sqf",
+		"modules\dashboard.sqf",
+		"modules\debug.sqf",
+		"modules\interaction.sqf",
+		"modules\lights.sqf"
+	];
 
 	GVAR(managedVehicles) = [];
 	call GVAR(fnc_loadConfig);
-	call GVAR(fnc_addAboutSection);
-	[] spawn GVAR(initKeydownListener);
+		
+	if (hasInterface) then {
+		call GVAR(fnc_addAboutSection);
+		[] spawn GVAR(initKeydownListener);
 
-	addMissionEventHandler [
-		"Draw3D",
-		{
+		addMissionEventHandler [
+			"Draw3D",
 			{
-				if (!alive _x) then {
-					[_x, SETTING_OFF, true] call GVAR(fnc_applySetting);
-					GVAR(managedVehicles) = GVAR(managedVehicles) select {alive _x};
-					continue;
-				};
+				{
+					if (!alive _x) then {
+						[_x, SETTING_OFF, true] call GVAR(fnc_applySetting);
+						GVAR(managedVehicles) = GVAR(managedVehicles) select {alive _x};
+						continue;
+					};
 
-				[_x] call GVAR(fnc_adjustOffsets);
-			} forEach GVAR(managedVehicles);
+					[_x] call GVAR(fnc_adjustOffsets);
+				} forEach GVAR(managedVehicles);
 
-			call GVAR(fnc_drawDashboard);
-		}
-	];
+				call GVAR(fnc_drawDashboard);
+			}
+		];
 
-	addMissionEventHandler [
-		"EachFrame",
-		{
-			call GVAR(fnc_dropParticles);
-		}
-	];
+		addMissionEventHandler [
+			"EachFrame",
+			{
+				call GVAR(fnc_dropParticles);
+			}
+		];
+	};
 
 	GVAR(initiated) = true;
 };
