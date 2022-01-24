@@ -45,7 +45,7 @@
 		_vehicle,
 		SETTING_CHANGED,
 		{
-			params ["_vehicle", "_currentSetting"];
+			params ["_vehicle", "_currentSetting", "_previousSetting"];
 		}
 	] call BIS_fnc_addScriptedEventHandler;
 */

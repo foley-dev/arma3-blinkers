@@ -11,10 +11,10 @@ GVAR(fnc_initAudioForVehicle) = {
 		_vehicle,
 		SETTING_CHANGED,
 		{
-			params ["_vehicle", "_interactionType"];
+			params ["_vehicle", "_currentSetting", "_previousSetting"];
 
-			private _currentlyOn = _interactionType != SETTING_OFF;
-			private _previouslyOn = (_vehicle getVariable [QGVAR(setting), SETTING_OFF]) != SETTING_OFF;
+			private _currentlyOn = _currentSetting != SETTING_OFF;
+			private _previouslyOn = _previousSetting != SETTING_OFF;
 
 			if (_previouslyOn) then {
 				[_vehicle, SWITCH_OFF] call GVAR(fnc_playSound);
@@ -41,7 +41,7 @@ GVAR(fnc_initAudioForVehicle) = {
 GVAR(fnc_playSound) = {
 	params ["_vehicle", "_sound"];
 
-	if (vehicle player != _vehicle || cameraView != "INTERNAL") exitWith {};
+	if (vehicle player != _vehicle || cameraView != "INTERNAL" || !alive player) exitWith {};
 
 	playSound _sound;
 

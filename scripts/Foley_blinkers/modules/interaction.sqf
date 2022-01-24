@@ -3,6 +3,12 @@
 GVAR(fnc_initInteractionsForVehicle) = {
 	params ["_vehicle"];
 	
+	private _currentSetting = _vehicle getVariable [QGVAR(setting), SETTING_OFF];
+
+	if (_currentSetting != SETTING_OFF) then {
+		[_vehicle, _currentSetting, true, true] call GVAR(fnc_applySetting);
+	};
+
 	[
 		_vehicle,
 		INTERACTED,
@@ -19,17 +25,26 @@ GVAR(fnc_initInteractionsForVehicle) = {
 };
 
 GVAR(fnc_applySetting) = {
-	params ["_vehicle", "_setting", ["_force", false]];
+	params ["_vehicle", "_setting", ["_force", false], ["_localOnly", false]];
 
 	private _previousSetting = _vehicle getVariable [QGVAR(setting), SETTING_OFF];
 
 	if (_setting != _previousSetting || _force) then {
-		[
-			_vehicle,
-			SETTING_CHANGED,
-			[_vehicle, _setting, _previousSetting]
-		] remoteExecCall ["BIS_fnc_callScriptedEventHandler", 0, false];
-		_vehicle setVariable [QGVAR(setting), _setting, true];
+		_vehicle setVariable [QGVAR(setting), _setting, !_localOnly];
+
+		if (_localOnly) then {
+			[
+				_vehicle,
+				SETTING_CHANGED,
+				[_vehicle, _setting, _previousSetting]
+			] call BIS_fnc_callScriptedEventHandler;
+		} else {
+			[
+				_vehicle,
+				SETTING_CHANGED,
+				[_vehicle, _setting, _previousSetting]
+			] remoteExecCall ["BIS_fnc_callScriptedEventHandler", 0, false];
+		};
 	};
 };
 

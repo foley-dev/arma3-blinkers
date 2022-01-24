@@ -10,7 +10,7 @@
 #define SYMBOL_HAZARDS "<!>"
 
 GVAR(fnc_drawDashboard) = {
-	if (!((vehicle player) in GVAR(managedVehicles)) || cameraView != "INTERNAL") exitWith {};
+	if (!((vehicle player) in GVAR(managedVehicles)) || cameraView != "INTERNAL" || !alive player) exitWith {};
 
 	private _vehicle = vehicle player;
 	private _state = _vehicle getVariable [QGVAR(setting), SETTING_OFF];

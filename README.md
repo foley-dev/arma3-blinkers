@@ -50,7 +50,7 @@ You can turn the blinkers on and off by calling a function:
 [myCar, 4] call Foley_blinkers_fnc_applySetting;  // off
 ```
 
-In multiplayer, this will propagate to all clients. Before calling this function, ensure that the script has already been initialized on *all* machines.
+In multiplayer, this will propagate to all clients including JIPs.
 
 ### Events
 
