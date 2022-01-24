@@ -2,13 +2,16 @@
 
 Turn signals script for Arma 3
 
+![Hazard lights at night](screenshots/hazard-lights-nighttime.jpg)
+
 ## Features
 
-* 3D dashboard and sound effects for 1st person view
+* Turn signals and hazard lights
 * Keyboard binds:
     * <kbd>Z</kbd> - left indicator
     * <kbd>C</kbd> - right indicator
     * <kbd>F</kbd> - hazard lights
+* Dashboard and sound effects in 1st person view
 * Multiplayer support
 * Optimized to handle many vehicles, also on low graphics settings
 
@@ -21,11 +24,35 @@ Turn signals script for Arma 3
     execVM "scripts\Foley_blinkers\init.sqf";
     ```
 
+## Screenshots
+
+![Hazard lights in daylight](screenshots/hazard-lights-daytime.jpg)
+![Hazard lights from rear](screenshots/hazard-lights-rear.jpg)
+![Left turn signals](screenshots/left-turn.jpg)
+![Dashboard](screenshots/dashboard.jpg)
+
+## Configuration
+
+The script comes with configuration for several vehicles. To add support for any other vehicle, edit `scripts\Foley_blinkers\config\extras.sqf`:
+
+```sqf
+[
+	[
+		"SOME_VEHICLE_CLASSNAME",  // classname of the vehicle
+		[
+			["FL", [0, 0, 0]],  // front-left indicator offset
+			["RR", [0, 0, 0]],  // rear-right indicator offset
+			["FR", [0, 0, 0]],  // front-right indicator offset
+			["RL", [0, 0, 0]],  // rear-left indicator offset
+			["DASH", [0, 0, 0]]  // dashboard offset
+		]
+	]
+]
+```
+
+Pull requests are welcome!
+
 ## Advanced usage
-
-### Multiplayer considerations
-
-The initialization script must be ran on every client. However, in order to change state of the blinkers (`Foley_blinkers_fnc_applySetting`), it's enough to call it on one machine as it will propagate to all clients, provided that your `CfgRemoteExec` doesn't prevent it.
 
 ### Initialization
 
@@ -38,6 +65,10 @@ If you need to limit which vehicles should be affected, you can pass an array to
 will initiate blinkers for `myCar`, `myCar2` and all vehicles of type `"I_Truck_02_box_F"`.\
 You may also add more vehicles later by running the init script again. It's okay to run it multiple times for the same vehicle.
 
+Multiplayer considerations:
+
+* The initialization script must be ran on each client.
+* Ensure that your `CfgRemoteExec` **does not** prevent remote execution of `setVariable` and `Foley_blinkers_fnc_applySetting`.
 
 ### Set blinkers programatically
 
@@ -51,6 +82,7 @@ You can turn the blinkers on and off by calling a function:
 ```
 
 In multiplayer, this will propagate to all clients including JIPs.
+
 
 ### Events
 
@@ -94,24 +126,3 @@ You can hook into the following events to execute your code when an action takes
 		}
 	] call BIS_fnc_addScriptedEventHandler;
     ```
-
-### Configuration
-
-The script comes with configuration for several vehicles. To add support for any other vehicle, edit `scripts\Foley_blinkers\config\extras.sqf`:
-
-```sqf
-[
-	[
-		"SOME_VEHICLE_CLASSNAME",  // classname of the vehicle
-		[
-			["FL", [0, 0, 0]],  // front-left indicator offset
-			["RR", [0, 0, 0]],  // rear-right indicator offset
-			["FR", [0, 0, 0]],  // front-right indicator offset
-			["RL", [0, 0, 0]],  // rear-left indicator offset
-			["DASH", [0, 0, 0]]  // dashboard offset
-		]
-	]
-]
-```
-
-Pull requests are welcome!

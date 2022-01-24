@@ -8,7 +8,6 @@ GVAR(fnc_addAboutSection) = {
 		QUOTE(NAMESPACE),
 		"<br />
 	<font size=18>Blinkers</font><br />
-	<font size=12>by Foley</font><br />
 	<br />
 	Turn signals script for Arma 3<br />
 	<br />
