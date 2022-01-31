@@ -32,18 +32,15 @@ GVAR(fnc_initLightsForVehicle) = {
 		_light setLightColor [1.0, 0.75, 0.0]; 
 		_light setLightUseFlare true;
 		_light setLightFlareSize 0.2;
-		_light setLightFlareMaxDistance 5000;
+		_light setLightFlareMaxDistance 1500;
 		_light setLightDayLight true;
 		_light setLightConePars [270, 120, 1];
 		_light attachTo [_vehicle, _offset];
 		_light setVectorDirAndUp [([0, 0, 0] vectorFromTo _offset), [0, 0, 1]];
-		
-		private _tracker = "Sign_sphere25cm_F" createVehicleLocal (getPos _vehicle);
-		hideObject _tracker;
 
 		_vehicle setVariable [QGVAR(light) + _x, _light];
 		_vehicle setVariable [QGVAR(lightOffset) + _x, _offset];
-		_vehicle setVariable [QGVAR(lightTracker) + _x, _tracker];
+		_vehicle setVariable [QGVAR(lightPreviousPosASL) + _x, getPosASLVisual _light];
 	} forEach ["FL", "FR", "RL", "RR"];
 
 	[
@@ -172,25 +169,25 @@ GVAR(fnc_rankLights) = {
 GVAR(fnc_adjustOffsets) = {
 	params ["_vehicle"];
 
-	if (abs speed _vehicle < 1) exitWith {};
+	if (abs speed _vehicle < 1 && _vehicle distance positionCameraToWorld [0, 0, 0] > 1000) exitWith {};
 
 	{
 		private _light = _vehicle getVariable (QGVAR(light) + _x);
 		private _offset = _vehicle getVariable (QGVAR(lightOffset) + _x);
-		private _tracker = _vehicle getVariable (QGVAR(lightTracker) + _x);
-
-		_tracker setPosASL getPosASLVisual _light;
+		private _previousPosASL = _vehicle getVariable (QGVAR(lightPreviousPosASL) + _x);
 
 		private _posASL = AGLToASL (_vehicle modelToWorldVisual _offset);
-		private _adjustment = _vehicle getVariable [QGVAR(lightAdjustment) + _x, [0, 0, 0]];
-		private _adjustedPosASL = _posASL vectorAdd _adjustment;
+
+		if (DEBUG) then {
+			drawIcon3D ["", [1,0,0,1], ASLToAGL _posASL, 0, 0, 0, "_posASL", 1, 0.03];
+			drawIcon3D ["", [0,0,1,1], ASLToAGL _previousPosASL, 0, 0, 0, "_previousPosASL", 1, 0.03];
+			drawLine3D [ASLToAGL _previousPosASL, ASLToAGL _posASL, [1,0,0,1]];
+		};
+
+		private _adjustedPosASL = _posASL vectorAdd (_posASL vectorDiff _previousPosASL);
 		_light setPosASL _adjustedPosASL;
 
-		if (diag_frameNo % 2 == 0) then {
-			private _diff = _posASL vectorDiff (getPosASLVisual _tracker);
-			_adjustment = _adjustment vectorAdd (_diff vectorMultiply 0.999);
-			_vehicle setVariable [QGVAR(lightAdjustment) + _x, _adjustment];
-		};
+		_vehicle setVariable [(QGVAR(lightPreviousPosASL) + _x), _posASL];
 	} forEach ["FL", "FR", "RL", "RR"];
 };
 
