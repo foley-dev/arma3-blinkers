@@ -27,16 +27,6 @@ if (isNil QGVAR(initiated)) then {
 		addMissionEventHandler [
 			"Draw3D",
 			{
-				{
-					if (!alive _x) then {
-						[_x, SETTING_OFF, true] call GVAR(fnc_applySetting);
-						GVAR(managedVehicles) = GVAR(managedVehicles) select {alive _x};
-						continue;
-					};
-
-					[_x] call GVAR(fnc_adjustOffsets);
-				} forEach GVAR(managedVehicles);
-
 				call GVAR(fnc_drawDashboard);
 			}
 		];
@@ -44,6 +34,17 @@ if (isNil QGVAR(initiated)) then {
 		addMissionEventHandler [
 			"EachFrame",
 			{
+				if (isGamePaused) exitWith {};
+				
+				private _destroyedVehicles = GVAR(managedVehicles) select {!alive _x};
+
+				if (count _destroyedVehicles > 0) then {
+					{
+						[_x, SETTING_OFF, true] call GVAR(fnc_applySetting);
+					} forEach _destroyedVehicles;
+					GVAR(managedVehicles) = GVAR(managedVehicles) select {alive _x};
+				};
+
 				call GVAR(fnc_dropParticles);
 			}
 		];
@@ -65,6 +66,7 @@ GVAR(fnc_initVehicle) = {
 	[_vehicle] call GVAR(fnc_initAudioForVehicle);
 	[_vehicle] call GVAR(fnc_initBreakerForVehicle);
 	[_vehicle] call GVAR(fnc_initInteractionsForVehicle);
+	[_vehicle] call GVAR(initDebugForVehicle);
 	[_vehicle, _config] call GVAR(fnc_initLightsForVehicle);
 
 	GVAR(managedVehicles) pushBack _vehicle;

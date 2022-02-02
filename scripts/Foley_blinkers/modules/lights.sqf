@@ -1,6 +1,10 @@
 #include "..\macros.hpp"
 #define LIGHT_RELATIVE_INTENSITY 500
 #define MAX_DYNAMIC_LIGHTS 3
+#define MAX_LIGHT_DISTANCE 1000
+#define PARTICLE_RELATIVE_INTENSITY 10
+#define DETAILED_PARTICLE_DISTANCE 50
+#define MAX_PARTICLE_DISTANCE 2000
 
 GVAR(activeLights) = [];
 GVAR(activeParticles) = [];
@@ -63,7 +67,7 @@ GVAR(fnc_initLightsForVehicle) = {
 			{
 				private _light = _vehicle getVariable [QGVAR(light) + _x, objNull];
 				GVAR(activeLights) pushBackUnique _light;
-
+				
 				private _particleSpec = [_vehicle, _vehicle getVariable (QGVAR(lightOffset) + _x)];
 				GVAR(activeParticles) pushBackUnique _particleSpec;
 			} forEach _lightsOn;
@@ -73,7 +77,7 @@ GVAR(fnc_initLightsForVehicle) = {
 			{
 				private _light = _vehicle getVariable [(QGVAR(light) + _x), objNull];
 
-				if (_light in GVAR(priorityLights) && isNull attachedTo _vehicle) then {
+				if (_light in GVAR(priorityLights) && isNull attachedTo _vehicle && abs speed _vehicle < 0.1) then {
 					_light setLightIntensity _intensity;
 				} else {
 					_light setLightIntensity 0;
@@ -109,7 +113,7 @@ GVAR(fnc_rankLights) = {
 		private _light = _x;	
 		private _distance = (positionCameraToWorld [0, 0, 0]) distance _light;
 
-		if (_distance > 1000) then {
+		if (_distance > MAX_LIGHT_DISTANCE) then {
 			break;
 		};
 
@@ -166,80 +170,88 @@ GVAR(fnc_rankLights) = {
 	};
 };
 
-GVAR(fnc_adjustOffsets) = {
-	params ["_vehicle"];
-
-	if (abs speed _vehicle < 1 && _vehicle distance positionCameraToWorld [0, 0, 0] > 1000) exitWith {};
-
-	{
-		private _light = _vehicle getVariable (QGVAR(light) + _x);
-		private _offset = _vehicle getVariable (QGVAR(lightOffset) + _x);
-		private _previousPosASL = _vehicle getVariable (QGVAR(lightPreviousPosASL) + _x);
-
-		private _posASL = AGLToASL (_vehicle modelToWorldVisual _offset);
-
-		if (DEBUG) then {
-			drawIcon3D ["", [1,0,0,1], ASLToAGL _posASL, 0, 0, 0, "_posASL", 1, 0.03];
-			drawIcon3D ["", [0,0,1,1], ASLToAGL _previousPosASL, 0, 0, 0, "_previousPosASL", 1, 0.03];
-			drawLine3D [ASLToAGL _previousPosASL, ASLToAGL _posASL, [1,0,0,1]];
-		};
-
-		private _adjustedPosASL = _posASL vectorAdd (_posASL vectorDiff _previousPosASL);
-		_light setPosASL _adjustedPosASL;
-
-		_vehicle setVariable [(QGVAR(lightPreviousPosASL) + _x), _posASL];
-	} forEach ["FL", "FR", "RL", "RR"];
-};
-
 GVAR(fnc_dropParticles) = {
 	{
 		_x params ["_vehicle", "_offset"];
 
 		private _distance = _vehicle distance positionCameraToWorld [0, 0, 0];
 
-		if (_distance > 2000) then {
+		if (_distance > MAX_PARTICLE_DISTANCE) then {
 			continue;
 		};
 
-		private _size = 0.4;
+		private _illumination = ((getLighting select 1) max 50) * PARTICLE_RELATIVE_INTENSITY;
+		private _particleTypes = [];
 
-		if (_distance < 30) then {
-			_size = linearConversion [0, 30, _distance, 0.1, 0.4, true];
+		if (_distance < DETAILED_PARTICLE_DISTANCE) then {
+			_particleTypes = [ 
+				[
+					0.08,
+					_illumination,
+					0.2
+				],
+				[
+					0.5,
+					_illumination,
+					0.005
+				],
+				[
+					1.0,
+					_illumination,
+					0.005
+				]
+			];
 		} else {
-			_size = linearConversion [30, 200, _distance, 0.4, 1.0, true];
+			private _scaledSize = linearConversion [0, 30, _distance, 0.1, 0.4, true];
+
+			if (_distance > 30) then {
+				private _scaledSize = linearConversion [30, 200, _distance, 0.4, 1.0, true];
+			};
+			
+			_particleTypes = [
+				[
+					_scaledSize,
+					_illumination,
+					0.05
+				]
+			];
 		};
 
-		private _illumination = linearConversion [0, 100, sqrt (getLighting select 1), 5, 100, true];
-	
-		drop [
-			[
-				"\A3\data_f\kouleSvetlo",
+		private _ttl = 1.01 / diag_fpsMin;
+
+		{
+			_x params ["_size", "_illumination", "_opacity"];
+
+			drop [
+				[
+					"\A3\data_f\kouleSvetlo",
+					1,
+					0,
+					1
+				],
+				"",
+				"Billboard",
+				1,
+				_ttl,
+				_offset,
+				[0, 0, 0],
+				1,
+				1.275,
 				1,
 				0,
-				1
-			],
-			"",
-			"Billboard",
-			1,
-			(1.01 / diag_fpsmin),
-			_offset,
-			[0, 0, 0],
-			1,
-			1.275,
-			1,
-			0,
-			[_size], 
-			[[0.6, 0.35, 0, 1]], 
-			[1000],
-			1,
-			0,
-			"",
-			"",
-			_vehicle,
-			0,
-			false,
-			-1,
-			[[0.6, 0.35, 0, 1] apply {_x * _illumination}]
-		];
+				[_size], 
+				[[0.6, 0.35, 0, _opacity]], 
+				[1000],
+				1,
+				0,
+				"",
+				"",
+				_vehicle,
+				0,
+				false,
+				-1,
+				[[0.6, 0.35, 0, 1] apply {_x * _illumination}]
+			];
+		} forEach _particleTypes;
 	} forEach GVAR(activeParticles);
 };
