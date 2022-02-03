@@ -3,6 +3,7 @@
 Turn signals script for Arma 3
 
 ![Hazard lights at night](screenshots/hazard-lights-nighttime.jpg)
+[Watch on YouTube](https://www.youtube.com/watch?v=7Z-1FUfHHvs)
 
 ## Features
 

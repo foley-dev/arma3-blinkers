@@ -17,7 +17,7 @@ GVAR(fnc_addAboutSection) = {
 	<font face='RobotoCondensedBold'>[C]</font> - toggle right indicator<br />
 	<font face='RobotoCondensedBold'>[F]</font> - toggle hazard lights<br />
 	<br />
-	<font size=12>Version: <font face='RobotoCondensedBold'>0.1</font><br />
+	<font size=12>Version: <font face='RobotoCondensedBold'>0.2</font><br />
 	Discord: <font face='RobotoCondensedBold'>Foley#1330</font><br />
 	GitHub: <font face='RobotoCondensedBold'>https://github.com/foley-dev/arma3-blinkers</font></font>"
 	];
