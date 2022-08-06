@@ -9,6 +9,7 @@
 GVAR(activeLights) = [];
 GVAR(activeParticles) = [];
 GVAR(priorityLights) = [];
+
 GVAR(lightsLookup) = [
 	SETTING_OFF,
 	SETTING_LEFT,
@@ -21,19 +22,42 @@ GVAR(lightsLookup) = [
 	[["FL","FR","RL","RR"], []]
 ];
 
+GVAR(rgbLightLookup) = [
+	"AMBER",
+	"RED"
+] createHashMapFromArray [
+	[1.0, 0.75, 0.0],
+	[1.0, 0.0, 0.0]
+];
+
+GVAR(rgbParticleLookup) = [
+	"AMBER",
+	"RED"
+] createHashMapFromArray [
+	[0.6, 0.35, 0.0],
+	[0.6, 0.0, 0.0]
+];
+
 GVAR(fnc_initLightsForVehicle) = {
 	params ["_vehicle", "_config"];
 
 	{
 		private _offset = _config get _x;
+		private _colorConfig = _config get "COLOR";
+		private _effectiveColorConfig = "AMBER";
+		
+		if (_x in ["RL", "RR"] && !isNil "_colorConfig" && {_colorConfig in keys GVAR(rgbLightLookup)}) then {
+			_effectiveColorConfig = _colorConfig;
+		};
 
 		if (isNil "_offset") then {continue;};
 		if !(_offset isEqualTypeArray [0, 0, 0]) then {continue;};
 
+		private _color = GVAR(rgbLightLookup) get _effectiveColorConfig;
 		private _light = "#lightreflector" createVehicleLocal (getPos _vehicle);
 		_light setLightIntensity 0;
 		_light setLightAttenuation [0.001, 100, 100, 100, 0.001, 0.002];
-		_light setLightColor [1.0, 0.75, 0.0]; 
+		_light setLightColor _color; 
 		_light setLightUseFlare true;
 		_light setLightFlareSize 0.2;
 		_light setLightFlareMaxDistance 1500;
@@ -45,6 +69,7 @@ GVAR(fnc_initLightsForVehicle) = {
 		_vehicle setVariable [QGVAR(light) + _x, _light];
 		_vehicle setVariable [QGVAR(lightOffset) + _x, _offset];
 		_vehicle setVariable [QGVAR(lightPreviousPosASL) + _x, getPosASLVisual _light];
+		_vehicle setVariable [QGVAR(colorConfig) + _x, _effectiveColorConfig];
 	} forEach ["FL", "FR", "RL", "RR"];
 
 	[
@@ -68,7 +93,11 @@ GVAR(fnc_initLightsForVehicle) = {
 				private _light = _vehicle getVariable [QGVAR(light) + _x, objNull];
 				GVAR(activeLights) pushBackUnique _light;
 				
-				private _particleSpec = [_vehicle, _vehicle getVariable (QGVAR(lightOffset) + _x)];
+				private _particleSpec = [
+					_vehicle,
+					_vehicle getVariable (QGVAR(lightOffset) + _x),
+					_vehicle getVariable (QGVAR(colorConfig) + _x)
+				];
 				GVAR(activeParticles) pushBackUnique _particleSpec;
 			} forEach _lightsOn;
 			
@@ -89,7 +118,11 @@ GVAR(fnc_initLightsForVehicle) = {
 				_light setLightIntensity 0;
 				GVAR(activeLights) deleteAt (GVAR(activeLights) find _light);
 				
-				private _particleSpec = [_vehicle, _vehicle getVariable (QGVAR(lightOffset) + _x)];
+				private _particleSpec = [
+					_vehicle,
+					_vehicle getVariable (QGVAR(lightOffset) + _x),
+					_vehicle getVariable (QGVAR(colorConfig) + _x)
+				];
 				GVAR(activeParticles) deleteAt (GVAR(activeParticles) find _particleSpec);
 			} forEach _lightsOff;
 		}
@@ -172,7 +205,7 @@ GVAR(fnc_rankLights) = {
 
 GVAR(fnc_dropParticles) = {
 	{
-		_x params ["_vehicle", "_offset"];
+		_x params ["_vehicle", "_offset", ["_colorConfig", "AMBER"]];
 
 		private _distance = _vehicle distance positionCameraToWorld [0, 0, 0];
 
@@ -181,6 +214,7 @@ GVAR(fnc_dropParticles) = {
 		};
 
 		private _illumination = ((getLighting select 1) max 50) * PARTICLE_RELATIVE_INTENSITY;
+		private _color = GVAR(rgbParticleLookup) get _colorConfig;
 		private _particleTypes = [];
 
 		if (_distance < DETAILED_PARTICLE_DISTANCE) then {
@@ -240,7 +274,7 @@ GVAR(fnc_dropParticles) = {
 				1,
 				0,
 				[_size], 
-				[[0.6, 0.35, 0, _opacity]], 
+				[_color + [_opacity]], 
 				[1000],
 				1,
 				0,
@@ -250,7 +284,7 @@ GVAR(fnc_dropParticles) = {
 				0,
 				false,
 				-1,
-				[[0.6, 0.35, 0, 1] apply {_x * _illumination}]
+				[(_color + [1]) apply {_x * _illumination}]
 			];
 		} forEach _particleTypes;
 	} forEach GVAR(activeParticles);

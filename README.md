@@ -33,6 +33,10 @@ Turn signals script for Arma 3
 ![Left turn signals](screenshots/left-turn.jpg)
 ![Dashboard](screenshots/dashboard.jpg)
 
+### New in **v0.3**
+
+![American-style blinker](screenshots/left-turn-american.jpg)
+
 ## Configuration
 
 The script comes with configuration for several vehicles. To add support for any other vehicle, edit `scripts\Foley_blinkers\config\extras.sqf`:
@@ -46,7 +50,8 @@ The script comes with configuration for several vehicles. To add support for any
 			["RR", [0, 0, 0]],  // rear-right indicator offset
 			["FR", [0, 0, 0]],  // front-right indicator offset
 			["RL", [0, 0, 0]],  // rear-left indicator offset
-			["DASH", [0, 0, 0]]  // dashboard offset
+			["DASH", [0, 0, 0]],  // dashboard offset
+			["COLOR", "RED"]  // optional, rear blinkers color ("RED" or "AMBER")
 		]
 	]
 ]
